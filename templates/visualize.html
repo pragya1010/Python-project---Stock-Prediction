@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+
+
+          <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        <title>Stock Predictor</title>
+
+</head>
+<body style="background-image: url('https://www.thebalance.com/thmb/gzsw-xTKtz8tT88z8XPBE2AJt0c=/506x337/filters:no_upscale()/stock-market-investing-in-stocks-57a25d785f9b589aa932fa0a.jpg'); background-size: cover">
+
+    <div class = "container h-100">
+        <div class="jumbotron" style="background-color:#1daeff !important; height: 50px">
+            <h2 style="color:#fff;">Stock Predictor</h2>
+
+        </div>
+
+
+
+        <div class="form-group" style="align-content: center">
+
+
+            <form method="POST" action="{{ url_for('predict')}}">
+                <input type="text" name = "companyname" placeholder="Company ticker">
+                <input type="text" name = "num_days" placeholder="no. of days to predict..">
+                <input type="text" name = "quantity" placeholder="quantity">
+                <input type="text" name = "unit" placeholder="unit">
+
+
+                <div class="row">
+                    <div class=" col md">
+                        <button type ="submit" name = "submit" class ="btn btn-primary" value = "Model" > Predict </button>
+
+                    </div>
+
+                    <div class=" col md">
+                        <button type ="submit" name = "submit" class ="btn btn-primary" value = "Trend"> Visualize </button>
+
+                    </div>
+                </div>
+
+
+            </form>
+
+        </div>
+
+        <div class = "row align-items-center">
+
+            <div class="col-md-6 col-sm-12 mx-auto">
+                <embed type="image/svg+xml" src={{graph1|safe}} />
+            </div>
+
+            <div class="col-md-6 col-sm-12 mx-auto">
+                <embed type="image/svg+xml" src={{graph2|safe}} />
+            </div>
+
+            <div class="col-md-6 col-sm-12 mx-auto">
+                <embed type="image/svg+xml" src={{graph3|safe}} />
+            </div>
+
+        </div>
+
+
+    </div>
+
+</body>
+</html>
