@@ -42,25 +42,6 @@ def predict():
             return render_template("404.html")
 
 
-@app.route('/visualize',methods=['POST','GET'])
-def visualize():
-    if request.method == 'POST':
-        companyname = request.form['companyname']
-        num_days = int(request.form['num_days'])
-        quantity = int(request.form['quantity'])
-        unit = request.form['unit']
-
-        company = Stock_Data(companyname, (quantity, unit))
-        # print("Fetching {} {} data for {}".format(company.unit, company.quantity, company.get_company()))
-        df = company.get_stock_data()
-
-        trend = Trend(df)
-        graph1, graph2, graph3 = trend.graph_analysis()
-
-        return render_template("visualize.html", graph_data=graph1)
-
-
-
 if __name__ == '__main__':
     app.run()
 

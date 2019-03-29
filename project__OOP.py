@@ -31,7 +31,6 @@ class Stock_Data:
         else:
             days = 365
 
-        # print(days)
         # Starting date provided. We are taking 1 year data as. of now
         now = datetime.datetime.now()
         end = datetime.datetime(now.year, now.month, now.day)
@@ -39,11 +38,11 @@ class Stock_Data:
         start = datetime.datetime.now() - datetime.timedelta(days=days)
         start = datetime.datetime(start.year, start.month, start.day)
 
-        # print(start,"    ",  end)
-
         data = pdb.DataReader(self.symbol, 'yahoo', start, end)
-        # data = fetch_data(companyname, start, end)
-        data.to_csv('PROJECT/data/'+self.symbol + '_Stock_Data.csv')
+        # filename = "/PROJECT/Data/"+self.symbol+ "_Stock_Data.csv"
+        filename= "/Users/pragya/PycharmProjects/LAB/PROJECT/Data/"+self.symbol+ "_Stock_Data.csv"
+        # print(filename)
+        data.to_csv(filename)
 
         return data
 
@@ -93,24 +92,21 @@ class Stock_Predict:
         date = future['ds']
         d = [date, actual_data, forecasted_data]
 
-
         readcsvdata = zip_longest(*d, fillvalue='')
-        with open('PROJECT/Data/futurepredictions.csv', 'w', encoding="ISO-8859-1", newline='') as myfile:
+        with open('/Users/pragya/PycharmProjects/LAB/PROJECT/Data/futurepredictions.csv', 'w', encoding="ISO-8859-1", newline='') as myfile:
             wr = csv.writer(myfile)
             wr.writerow(("Date", "Actual_price", "Forecasted_Price"))
             wr.writerows(readcsvdata)
         myfile.close()
 
         # predicted days 10 days stock price
-        self.prediction_data =  pd.read_csv('PROJECT/Data/futurepredictions.csv')
+        self.prediction_data =  pd.read_csv('/Users/pragya/PycharmProjects/LAB/PROJECT/Data/futurepredictions.csv')
         self.prediction_data['Date'] = pd.to_datetime(self.prediction_data['Date']).apply(lambda x:x.strftime('%Y-%m-%d'))
         self.prediction_data = self.prediction_data[['Date', 'Forecasted_Price']]
         self.prediction_data.set_index('Date', inplace=True)
         self.future = self.prediction_data.tail(self.num_days)
-
-
+        # next day predicted price
         self.next_price = self.prediction_data['Forecasted_Price'][len(self.prediction_data['Forecasted_Price'])- self.num_days]
-
 
         #### graph data
         graph = pygal.Line()
@@ -120,17 +116,23 @@ class Stock_Predict:
         graph.add('Forecasted data', forecasted_data)
         graph_data = graph.render_data_uri()
 
+        plt.plot(date, actual_data, color='red', label='Actual')
+        plt.plot(date, forecasted_data, color='blue', label='Forecasted')
+        plt.xlabel('Date')
+        plt.ylabel('Stock Price')
+
+        plt.title('Model Predictions')
+        plt.legend()
+        plt.show()
+
         return graph_data
 
 
     def recommend(self):
 
         df = self.future
-
         suggestion = "Buy" if df['Forecasted_Price'][0]> self.ending_stock_price else "Sell"
-
         return suggestion
-
 
 class Trend:
     def __init__(self, df):
@@ -138,22 +140,34 @@ class Trend:
 
     def graph_analysis(self):
         self.data = self.data[['Open', 'High', 'Low', 'Close', 'Volume']]
-
         # define a new feature, HL_PCT
-        self.data['HL_PCT'] = (self.data['High'] - self.data['Low']) / (self.data['Low'] * 100)
-
+        self.data['HL_PCT'] = ((self.data['High'] - self.data['Low']) / self.data['Low']) * 100
         # define a new feature percentage change
-        self.data['PCT_CHNG'] = (self.data['Close'] - self.data['Open']) / (self.data['Open'] * 100)
-
-
+        self.data['PCT_CHNG'] = ((self.data['Close'] - self.data['Open']) / self.data['Open']) * 100
 
         ## Price Trend = Graph1
-        # self.data['Close'].plot(figsize=(15, 6), color="green")
-        # plt.legend(loc=4)
-        # plt.xlabel('Date')
-        # plt.ylabel('Price')
-        # plt.title("Price Trend")
-        # plt.show()
+        self.data['Close'].plot(figsize=(15, 6), color="green")
+        plt.legend(loc=4)
+        plt.xlabel('Date')
+        plt.ylabel('Price')
+        plt.title("Price Trend")
+        plt.show()
+
+        ## Moving Average = Graph2
+        self.data['HL_PCT'].plot(figsize=(15, 6), color="red")
+        plt.legend(loc=4)
+        plt.xlabel('Date')
+        plt.ylabel('High Low Percentage')
+        plt.title("Moving Average")
+        plt.show()
+
+        ## Percentage Change= Graph1
+        self.data['PCT_CHNG'].plot(figsize=(15, 6), color="blue")
+        plt.legend(loc=4)
+        plt.xlabel('Date')
+        plt.ylabel('Percent Change')
+        plt.title("Moving Percentage change")
+        plt.show()
 
         graph = pygal.Line()
         graph.title = '%Price Trend%'
@@ -178,31 +192,33 @@ class Trend:
         return graph_data1, graph_data2, graph_data3
 
 
-
-
-### GET STOCK DATA
-company = Stock_Data('GOOGL', (1, "year"))
-print("Fetching {} {} data for {}".format(company.unit, company.quantity, company.get_company()))
-df = company.get_stock_data()
-
-#### TREND ANALYSIS
-trend = Trend(df)
-# print(trend.data.tail(10))
-graph1, graph2, graph3 = trend.graph_analysis()
-
-###### PREDICT
-predictor = Stock_Predict(df, 10)
-# print(predictor.stock_data)
-# print(predictor.num_days)
-graph = predictor.prophet_model()
-df1 = predictor.future
-print(df1)
-# future = predictor.future
-print("Current Stock Price: ",predictor.ending_stock_price)
-print("Next Day Predicted Price:  ",predictor.next_price)
-print("Model recommends to ",predictor.recommend())
-
-
-
-
-
+# ### GET STOCK DATA
+# company = Stock_Data('AAPL', (1, "year"))
+# print("Fetching {} {} data for {}".format(company.quantity,company.unit, company.get_company()))
+# df = company.get_stock_data()
+#
+# #### TREND ANALYSIS
+# trend = Trend(df)
+# graph1, graph2, graph3 = trend.graph_analysis()
+#
+# ###### PREDICT
+# predictor = Stock_Predict(df, 10)
+# graph = predictor.prophet_model()
+# df1 = predictor.future
+# print(df1)
+# print("Current Stock Price: ",predictor.ending_stock_price)
+# print("Next Day Predicted Price:  ",predictor.next_price)
+# print("Model recommends to ",predictor.recommend())
+#
+# def error():
+#     # df = Stock_Data('AAPL', (1, "year"))
+#     error_predictor = Stock_Predict(df[:len(df)-10], 10)
+#     graph = error_predictor .prophet_model()
+#     df2 = error_predictor.future
+#     df1 = df.tail(10)
+#     df_merged = df1.merge(df2, how='outer', left_index=True, right_index=True)
+#     df_new = df_merged.dropna()[['Close', 'Forecasted_Price']]
+#     mape = np.mean(np.abs((df_new['Close'] - df_new['Forecasted_Price']) / df_new['Close'])) * 100
+#     print("Mean absolute percentage error : ", mape)
+#
+# error()
